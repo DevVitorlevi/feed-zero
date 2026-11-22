@@ -1,35 +1,35 @@
-import { viewPlayer } from '../activePlayer';
 import { motion } from 'framer-motion';
-import { Heart, Layers, Star } from 'lucide-react';
+import { Heart, Layers, MapPin, Star } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { GameState } from '../../engine/types';
+import { turnPlayer } from '../activePlayer';
 import { ZONE_SHORT, charDef } from '../labels';
 
-function Stat({ icon, value, label }: { icon: ReactNode; value: string | number; label: string }) {
+function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: string | number }) {
   return (
-    <span className="flex items-center gap-1 font-bold" title={label}>
+    <div className="flex items-center gap-1 rounded-[10px] border-2 border-ink bg-paper px-2 py-1">
       {icon}
+      <span className="text-sm font-bold">{label}</span>
       <motion.span
         key={String(value)}
-        className="inline-block"
+        className="inline-block text-base font-extrabold"
         initial={{ scale: 1.5 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 400, damping: 20 }}
       >
         {value}
       </motion.span>
-      <span className="sr-only">{label}</span>
-    </span>
+    </div>
   );
 }
 
 export function PlayerPanel({ game }: { game: GameState }) {
-  const active = viewPlayer(game);
+  const active = turnPlayer(game);
   return (
     <ul className="flex flex-col gap-2" aria-label="Jogadores">
       {game.players.map((p) => {
         const def = charDef(p.character);
-        const isActive = p.id === active.id && game.phase !== 'ended';
+        const isActive = active !== null && p.id === active.id;
         return (
           <li
             key={p.id}
@@ -39,7 +39,7 @@ export function PlayerPanel({ game }: { game: GameState }) {
             <div className="flex items-center justify-between gap-2">
               <span className="truncate font-extrabold">{p.name}</span>
               <span
-                className="rounded-full border-2 border-ink px-2 text-xs font-bold"
+                className="rounded-full border-2 border-ink px-2 text-sm font-bold"
                 style={{
                   background: def.color,
                   color: def.id === 'caio' || def.id === 'helena' ? '#fff' : '#2B2B33',
@@ -48,31 +48,39 @@ export function PlayerPanel({ game }: { game: GameState }) {
                 {def.name}
               </span>
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+
+            <div className="mt-2 grid grid-cols-2 gap-1">
               <Stat
                 icon={<Heart size={16} aria-hidden="true" />}
-                value={`${p.integrity}/${game.config.limits.integrityMax}`}
                 label="Integridade"
+                value={`${p.integrity}/${game.config.limits.integrityMax}`}
               />
               <Stat
                 icon={<Star size={16} aria-hidden="true" />}
-                value={p.reputation}
                 label="Reputação"
+                value={p.reputation}
               />
               <Stat
                 icon={<Layers size={16} aria-hidden="true" />}
-                value={p.hand.length}
-                label="Cartas na mão"
+                label="Mão"
+                value={`${p.hand.length}/${game.config.limits.handMax}`}
               />
-              <span className="text-xs">{ZONE_SHORT[p.zone]}</span>
+              <Stat
+                icon={<MapPin size={16} aria-hidden="true" />}
+                label="Zona"
+                value={ZONE_SHORT[p.zone]}
+              />
             </div>
+
             {(isActive || p.suspended) && (
-              <div className="mt-1 flex gap-1 text-xs font-bold">
+              <div className="mt-2 flex gap-1 text-sm font-bold">
                 {isActive && (
-                  <span className="rounded-full bg-violet px-2 text-white">Jogando</span>
+                  <span className="rounded-full bg-violet px-2 text-white">Jogando agora</span>
                 )}
                 {p.suspended && (
-                  <span className="rounded-full bg-alert px-2 text-white">Suspenso</span>
+                  <span className="rounded-full bg-alert px-2 text-white">
+                    Suspenso (perde o próximo turno)
+                  </span>
                 )}
               </div>
             )}
