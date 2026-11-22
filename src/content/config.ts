@@ -1,0 +1,36 @@
+import type { GameConfig } from '../engine/types';
+
+export const CONFIG: GameConfig = {
+  players: { min: 2, max: 4 },
+  start: { integrity: 5, reputation: 0, zone: 'feed', handSize: 3, initialThreats: 2 },
+  limits: { integrityMax: 8, handMax: 5, hateMax: 12 },
+  moveRange: 2,
+  suspension: { returnIntegrity: 2, returnZone: 'feed' },
+  goal: { default: 5, twoPlayers: 4 },
+  threatsPerRoundBase: 1,
+  threatsPerRoundLate: { fromRound: 5, count: 2 },
+  rest: { integrity: 1, draw: 2 },
+  support: { maxCards: 2, reputation: 1 },
+  confront: { minCards: 1, maxCards: 2, weaknessBonus: 1, baseReputation: 1, minStrength: 1 },
+  shortcut: { integrityCost: 2, hateCost: 1 },
+  abilities: {
+    marina: { bonus: 1, types: ['discurso_odio', 'assedio'] },
+    caio: { peekCount: 2 },
+    rafa: { reputationBonus: 1, shortcutExtra: 1 },
+    helena: { reach: 1 },
+  },
+  scoring: { cleanKillPoints: 1 },
+  zoneEffects: {
+    stories: { strengthMod: -1 },
+    trending: { strengthMod: +1, bonusReputation: 2 },
+    feed: { bonusReputation: 1 },
+    grupos: { strengthModIfOtherThreat: +1 },
+    dms: { noReputation: true, bonusIntegrity: 1 },
+    comentarios: { exploreDrawsResponse: 1 },
+  },
+  safeZone: 'central',
+  redirectZone: 'feed',
+  responseCopies: 1,
+  logMax: 150,
+  historyMax: 5,
+};
