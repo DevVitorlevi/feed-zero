@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import type { PlayerState } from '../../engine/types';
 import { CHAR_FG, charDef } from '../labels';
 
@@ -9,7 +10,10 @@ interface Props {
 export function PlayerToken({ player, active }: Props) {
   const def = charDef(player.character);
   return (
-    <span
+    <motion.span
+      layoutId={`token-${player.id}`}
+      layout="position"
+      transition={{ type: 'spring', stiffness: 260, damping: 28 }}
       className="grid h-8 w-8 place-items-center rounded-full border-[3px] border-ink text-sm font-extrabold"
       style={{
         background: def.color,
@@ -22,6 +26,6 @@ export function PlayerToken({ player, active }: Props) {
       aria-label={`${player.name}, ${def.name}${active ? ', jogando agora' : ''}`}
     >
       {player.name.trim().charAt(0).toUpperCase()}
-    </span>
+    </motion.span>
   );
 }

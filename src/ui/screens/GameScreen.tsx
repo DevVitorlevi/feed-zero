@@ -1,4 +1,4 @@
-import { Undo2 } from 'lucide-react';
+import { BookOpen, Undo2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { CONFIG } from '../../content/config';
 import { getLegalActions } from '../../engine/selectors';
@@ -13,9 +13,11 @@ import { DilemmaModal } from '../components/DilemmaModal';
 import { EventLog } from '../components/EventLog';
 import { Hand } from '../components/Hand';
 import { HateMeter } from '../components/HateMeter';
+import { HateOverlay } from '../components/HateOverlay';
 import { PhaseBanner } from '../components/PhaseBanner';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { PressButton } from '../components/PressButton';
+import { RulesModal } from '../components/RulesModal';
 import { SupportModal } from '../components/SupportModal';
 import { ThreatInspector } from '../components/ThreatInspector';
 
@@ -29,6 +31,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   const [confrontOpen, setConfrontOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [debugOpen, setDebugOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
 
   const legal = useMemo(() => (game ? getLegalActions(game) : null), [game]);
 
@@ -51,6 +54,8 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 
   return (
     <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-3 p-3 sm:p-4">
+      <HateOverlay hate={game.hate} />
+
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-extrabold text-net">Feed Zero</h1>
@@ -62,6 +67,10 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
+          <PressButton className="btn" onClick={() => setRulesOpen(true)}>
+            <BookOpen size={18} className="mr-1 inline" aria-hidden="true" />
+            Regras
+          </PressButton>
           <PressButton
             className="btn"
             disabled={!legal.canUndo}
@@ -101,13 +110,15 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
         </aside>
 
         <section className="order-1 flex flex-col gap-3 lg:order-2">
-          <Board
-            game={game}
-            reachable={moving ? legal.moveZones : []}
-            onMove={move}
-            inspectId={inspectId}
-            onInspect={setInspectId}
-          />
+          <div className={game.hate > 10 ? 'hate-shake' : undefined}>
+            <Board
+              game={game}
+              reachable={moving ? legal.moveZones : []}
+              onMove={move}
+              inspectId={inspectId}
+              onInspect={setInspectId}
+            />
+          </div>
 
           <div className="panel flex flex-wrap items-center justify-between gap-2">
             {moving && (
@@ -243,6 +254,8 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           onChoose={(option) => send({ type: 'CHOOSE_DILEMMA', option })}
         />
       )}
+
+      {rulesOpen && <RulesModal onClose={() => setRulesOpen(false)} />}
     </div>
   );
 }

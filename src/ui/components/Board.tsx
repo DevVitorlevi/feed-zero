@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { CSSProperties } from 'react';
 import { ZONES } from '../../content/zones';
 import { threatStrength } from '../../engine/selectors';
@@ -116,30 +116,41 @@ export function Board({ game, reachable, onMove, inspectId, onInspect }: Props) 
                 </div>
               )}
 
-              {threats.map((t) => {
-                const strength = threatStrength(game, t.card.id) ?? t.card.strength;
-                const inspected = inspectId === t.card.id;
-                return (
-                  <button
-                    key={t.card.id}
-                    type="button"
-                    onClick={() => onInspect(t.card.id)}
-                    aria-pressed={inspected}
-                    aria-label={`${t.card.name}, Força ${strength}`}
-                    title={`${t.card.name} (Força ${strength})`}
-                    className="relative z-10 flex min-h-[44px] items-center gap-1 rounded-[10px] border-[3px] border-ink bg-alert px-1 text-left text-sm font-bold leading-tight text-white"
-                    style={{
-                      outline: inspected ? '3px solid var(--violet)' : 'none',
-                      outlineOffset: 2,
-                    }}
-                  >
-                    <span className="grid h-6 min-w-6 shrink-0 place-items-center rounded bg-white px-1 text-ink">
-                      {strength}
-                    </span>
-                    <span className="line-clamp-2 min-w-0 break-words">{t.card.name}</span>
-                  </button>
-                );
-              })}
+              <AnimatePresence initial={false}>
+                {threats.map((t) => {
+                  const strength = threatStrength(game, t.card.id) ?? t.card.strength;
+                  const inspected = inspectId === t.card.id;
+                  return (
+                    <motion.button
+                      key={t.card.id}
+                      type="button"
+                      onClick={() => onInspect(t.card.id)}
+                      aria-pressed={inspected}
+                      aria-label={`${t.card.name}, Força ${strength}`}
+                      title={`${t.card.name} (Força ${strength})`}
+                      className="relative z-10 flex min-h-[44px] items-center gap-1 rounded-[10px] border-[3px] border-ink bg-alert px-1 text-left text-sm font-bold leading-tight text-white"
+                      style={{
+                        outline: inspected ? '3px solid var(--violet)' : 'none',
+                        outlineOffset: 2,
+                      }}
+                      initial={{ scale: 0.3, opacity: 0, y: -14 }}
+                      animate={{ scale: 1, opacity: 1, y: 0 }}
+                      exit={{
+                        scale: [1, 1.12, 0.2],
+                        rotate: [0, -3, 6],
+                        opacity: [1, 1, 0],
+                        transition: { duration: 0.5, ease: 'easeIn' },
+                      }}
+                      transition={{ type: 'spring', stiffness: 380, damping: 18 }}
+                    >
+                      <span className="grid h-6 min-w-6 shrink-0 place-items-center rounded bg-white px-1 text-ink">
+                        {strength}
+                      </span>
+                      <span className="line-clamp-2 min-w-0 break-words">{t.card.name}</span>
+                    </motion.button>
+                  );
+                })}
+              </AnimatePresence>
             </motion.div>
           </div>
         );
