@@ -107,3 +107,36 @@ body {
     border-color: var(--net);
   }
 }
+
+/* Ódio Viral esquentando a tela */
+@keyframes hate-pulse {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 6px var(--alert);
+  }
+  50% {
+    box-shadow: inset 0 0 0 14px var(--alert);
+  }
+}
+@keyframes hate-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2px, 1px);
+  }
+  75% {
+    transform: translate(2px, -1px);
+  }
+}
+.hate-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  animation: hate-pulse 1.4s ease-in-out infinite;
+}
+.hate-shake {
+  animation: hate-shake 0.18s linear infinite;
+}

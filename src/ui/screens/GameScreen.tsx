@@ -13,6 +13,7 @@ import { DilemmaModal } from '../components/DilemmaModal';
 import { EventLog } from '../components/EventLog';
 import { Hand } from '../components/Hand';
 import { HateMeter } from '../components/HateMeter';
+import { HateOverlay } from '../components/HateOverlay';
 import { PhaseBanner } from '../components/PhaseBanner';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { PressButton } from '../components/PressButton';
@@ -53,6 +54,8 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 
   return (
     <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-3 p-3 sm:p-4">
+      <HateOverlay hate={game.hate} />
+
       <header className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-2xl font-extrabold text-net">Feed Zero</h1>
@@ -107,13 +110,15 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
         </aside>
 
         <section className="order-1 flex flex-col gap-3 lg:order-2">
-          <Board
-            game={game}
-            reachable={moving ? legal.moveZones : []}
-            onMove={move}
-            inspectId={inspectId}
-            onInspect={setInspectId}
-          />
+          <div className={game.hate > 10 ? 'hate-shake' : undefined}>
+            <Board
+              game={game}
+              reachable={moving ? legal.moveZones : []}
+              onMove={move}
+              inspectId={inspectId}
+              onInspect={setInspectId}
+            />
+          </div>
 
           <div className="panel flex flex-wrap items-center justify-between gap-2">
             {moving && (
