@@ -61,7 +61,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             Eliminadas {game.eliminated}/{game.goal}
           </span>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <PressButton
             className="btn"
             disabled={!legal.canUndo}

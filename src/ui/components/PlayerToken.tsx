@@ -10,7 +10,7 @@ export function PlayerToken({ player, active }: Props) {
   const def = charDef(player.character);
   return (
     <span
-      className="grid h-7 w-7 place-items-center rounded-full border-[3px] border-ink text-xs font-extrabold"
+      className="grid h-8 w-8 place-items-center rounded-full border-[3px] border-ink text-sm font-extrabold"
       style={{
         background: def.color,
         color: CHAR_FG[player.character],
