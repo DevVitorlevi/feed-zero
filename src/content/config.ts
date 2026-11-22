@@ -30,7 +30,7 @@ export const CONFIG: GameConfig = {
   },
   safeZone: 'central',
   redirectZone: 'feed',
-  responseCopies: 1,
+  responseCopies: 2,
   logMax: 150,
   historyMax: 5,
 };
