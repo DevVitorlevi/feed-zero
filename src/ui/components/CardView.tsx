@@ -13,8 +13,17 @@ interface Props {
 export const CardView = memo(function CardView({ card, selected, onToggle, onZoom }: Props) {
   return (
     <motion.div
+      layout="position"
       className="flex shrink-0 flex-col gap-1"
-      animate={{ y: selected ? -14 : 0, scale: selected ? 1.04 : 1 }}
+      initial={{ opacity: 0, scale: 0.6, y: 24 }}
+      animate={{ opacity: 1, y: selected ? -14 : 0, scale: selected ? 1.04 : 1 }}
+      exit={{
+        opacity: 0,
+        scale: 0.5,
+        y: -36,
+        rotate: 8,
+        transition: { duration: 0.4, ease: 'easeIn' },
+      }}
       whileHover={{ y: selected ? -14 : -6 }}
       transition={{ type: 'spring', stiffness: 400, damping: 28 }}
     >

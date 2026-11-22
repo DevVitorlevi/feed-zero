@@ -1,3 +1,4 @@
+import { AnimatePresence } from 'framer-motion';
 import { useCallback, useMemo, useState } from 'react';
 import type { GameConfig, PlayerState } from '../../engine/types';
 import { cardCaption } from '../labels';
@@ -44,16 +45,18 @@ export function Hand({ player, config, selected, onToggle }: Props) {
       {cards.length === 0 ? (
         <p>Sem cartas na mão.</p>
       ) : (
-        <div className="flex gap-3 overflow-x-auto px-1 pb-2 pt-4">
-          {cards.map((c) => (
-            <CardView
-              key={c.id}
-              card={c}
-              selected={selected.includes(c.id)}
-              onToggle={onToggle}
-              onZoom={openZoom}
-            />
-          ))}
+        <div key={player.id} className="flex gap-3 overflow-x-auto px-1 pb-2 pt-4">
+          <AnimatePresence initial={false}>
+            {cards.map((c) => (
+              <CardView
+                key={c.id}
+                card={c}
+                selected={selected.includes(c.id)}
+                onToggle={onToggle}
+                onZoom={openZoom}
+              />
+            ))}
+          </AnimatePresence>
         </div>
       )}
 
