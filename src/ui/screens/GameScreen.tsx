@@ -5,6 +5,8 @@ import { getLegalActions } from '../../engine/selectors';
 import type { ZoneId } from '../../engine/types';
 import { useApp, useSend } from '../../state/GameContext';
 import { Board } from '../components/Board';
+import { ConfrontModal } from '../components/ConfrontModal';
+import { DilemmaModal } from '../components/DilemmaModal';
 import { Hand } from '../components/Hand';
 import { HateMeter } from '../components/HateMeter';
 import { PhaseBanner } from '../components/PhaseBanner';
@@ -19,6 +21,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   const send = useSend();
   const [selected, setSelected] = useState<string[]>([]);
   const [inspectId, setInspectId] = useState<string | null>(null);
+  const [confrontOpen, setConfrontOpen] = useState(false);
 
   const legal = useMemo(() => (game ? getLegalActions(game) : null), [game]);
 
@@ -35,6 +38,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   const active = game.players[game.activeIdx];
   const validSelected = selected.filter((id) => active.hand.some((c) => c.id === id));
   const move = (zone: ZoneId) => send({ type: 'MOVE', zone });
+  const acting = game.phase === 'turn.act';
 
   return (
     <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-3 p-3 sm:p-4">
@@ -109,8 +113,33 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
                 </PressButton>
               </>
             )}
-            {game.phase === 'turn.act' && (
-              <p className="font-bold">As ações do turno entram no próximo bloco.</p>
+            {acting && (
+              <>
+                <p className="font-bold">Escolha uma ação (só uma por turno).</p>
+                <div className="flex flex-wrap gap-2">
+                  <PressButton
+                    className="btn btn-primary"
+                    disabled={legal.confrontTargets.length === 0}
+                    onClick={() => setConfrontOpen(true)}
+                  >
+                    Enfrentar
+                  </PressButton>
+                  <PressButton
+                    className="btn"
+                    disabled={!legal.canExplore}
+                    onClick={() => send({ type: 'EXPLORE' })}
+                  >
+                    Explorar
+                  </PressButton>
+                  <PressButton
+                    className="btn"
+                    disabled={!legal.canRest}
+                    onClick={() => send({ type: 'REST' })}
+                  >
+                    Descansar
+                  </PressButton>
+                </div>
+              </>
             )}
             {game.phase === 'ended' && (
               <PressButton className="btn btn-primary" onClick={onExit}>
@@ -132,6 +161,28 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           <section className="panel text-sm">O registro de eventos entra no próximo bloco.</section>
         </aside>
       </div>
+
+      {confrontOpen && acting && (
+        <ConfrontModal
+          game={game}
+          targets={legal.confrontTargets}
+          initialCards={validSelected}
+          onClose={() => setConfrontOpen(false)}
+          onConfirm={(threatId, cardIds) => {
+            send({ type: 'CONFRONT', threatId, cardIds });
+            setConfrontOpen(false);
+            setSelected([]);
+          }}
+        />
+      )}
+
+      {game.phase === 'turn.dilemma' && game.pendingDilemma && (
+        <DilemmaModal
+          dilemma={game.pendingDilemma}
+          playerName={active.name}
+          onChoose={(option) => send({ type: 'CHOOSE_DILEMMA', option })}
+        />
+      )}
     </div>
   );
 }
