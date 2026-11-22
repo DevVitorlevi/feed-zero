@@ -1,3 +1,4 @@
+import { viewPlayer } from '../activePlayer';
 import { useState } from 'react';
 import type { GameState } from '../../engine/types';
 import { charDef } from '../labels';
@@ -12,7 +13,7 @@ interface Props {
 }
 
 export function SupportModal({ game, targets, onConfirm, onClose }: Props) {
-  const me = game.players[game.activeIdx];
+  const me = viewPlayer(game);
   const max = game.config.support.maxCards;
   const [toId, setToId] = useState<string>(targets[0] ?? '');
   const [cardIds, setCardIds] = useState<string[]>([]);

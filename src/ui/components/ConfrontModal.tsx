@@ -1,3 +1,4 @@
+import { viewPlayer } from '../activePlayer';
 import { Flame } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { previewConfront } from '../../engine/confront';
@@ -29,7 +30,7 @@ function Row({ label, value, strong }: { label: string; value: string; strong?: 
 const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
 
 export function ConfrontModal({ game, targets, initialCards, onConfirm, onClose }: Props) {
-  const me = game.players[game.activeIdx];
+  const me = viewPlayer(game);
   const [threatId, setThreatId] = useState<string>(targets[0] ?? '');
   const [cardIds, setCardIds] = useState<string[]>(
     initialCards.slice(0, game.config.confront.maxCards),

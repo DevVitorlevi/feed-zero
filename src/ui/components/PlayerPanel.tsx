@@ -1,3 +1,4 @@
+import { viewPlayer } from '../activePlayer';
 import { motion } from 'framer-motion';
 import { Heart, Layers, Star } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -23,7 +24,7 @@ function Stat({ icon, value, label }: { icon: ReactNode; value: string | number;
 }
 
 export function PlayerPanel({ game }: { game: GameState }) {
-  const active = game.players[game.activeIdx];
+  const active = viewPlayer(game);
   return (
     <ul className="flex flex-col gap-2" aria-label="Jogadores">
       {game.players.map((p) => {

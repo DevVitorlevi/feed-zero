@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import type { GameState } from '../../engine/types';
+import { viewPlayer } from '../activePlayer';
 
 function bannerFor(g: GameState): { text: string; bg: string; fg: string } {
-  const name = g.players[g.activeIdx].name;
+  const name = viewPlayer(g).name;
   switch (g.phase) {
     case 'turn.move':
       return {

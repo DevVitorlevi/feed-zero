@@ -4,14 +4,19 @@ import { CONFIG } from '../../content/config';
 import { getLegalActions } from '../../engine/selectors';
 import type { ZoneId } from '../../engine/types';
 import { useApp, useSend } from '../../state/GameContext';
+import { viewPlayer } from '../activePlayer';
+import { AlgorithmPanel } from '../components/AlgorithmPanel';
 import { Board } from '../components/Board';
 import { ConfrontModal } from '../components/ConfrontModal';
+import { DebugModal } from '../components/DebugModal';
 import { DilemmaModal } from '../components/DilemmaModal';
+import { EventLog } from '../components/EventLog';
 import { Hand } from '../components/Hand';
 import { HateMeter } from '../components/HateMeter';
 import { PhaseBanner } from '../components/PhaseBanner';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { PressButton } from '../components/PressButton';
+import { SupportModal } from '../components/SupportModal';
 import { ThreatInspector } from '../components/ThreatInspector';
 
 const MAX_SELECTED = CONFIG.confront.maxCards;
@@ -22,6 +27,8 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [inspectId, setInspectId] = useState<string | null>(null);
   const [confrontOpen, setConfrontOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [debugOpen, setDebugOpen] = useState(false);
 
   const legal = useMemo(() => (game ? getLegalActions(game) : null), [game]);
 
@@ -35,10 +42,12 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
 
   if (!game || !legal) return null;
 
-  const active = game.players[game.activeIdx];
+  const active = viewPlayer(game);
   const validSelected = selected.filter((id) => active.hand.some((c) => c.id === id));
   const move = (zone: ZoneId) => send({ type: 'MOVE', zone });
+  const moving = game.phase === 'turn.move';
   const acting = game.phase === 'turn.act';
+  const inTurn = moving || acting || game.phase === 'turn.dilemma';
 
   return (
     <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-3 p-3 sm:p-4">
@@ -94,23 +103,30 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
         <section className="order-1 flex flex-col gap-3 lg:order-2">
           <Board
             game={game}
-            reachable={game.phase === 'turn.move' ? legal.moveZones : []}
+            reachable={moving ? legal.moveZones : []}
             onMove={move}
             inspectId={inspectId}
             onInspect={setInspectId}
           />
 
           <div className="panel flex flex-wrap items-center justify-between gap-2">
-            {game.phase === 'turn.move' && (
+            {moving && (
               <>
                 <p className="font-bold">Toque numa zona destacada para mover.</p>
-                <PressButton
-                  className="btn btn-primary"
-                  disabled={!legal.canSkipMove}
-                  onClick={() => send({ type: 'SKIP_MOVE' })}
-                >
-                  Ficar
-                </PressButton>
+                <div className="flex flex-wrap gap-2">
+                  {legal.canDebug && (
+                    <PressButton className="btn" onClick={() => setDebugOpen(true)}>
+                      Debug do Algoritmo
+                    </PressButton>
+                  )}
+                  <PressButton
+                    className="btn btn-primary"
+                    disabled={!legal.canSkipMove}
+                    onClick={() => send({ type: 'SKIP_MOVE' })}
+                  >
+                    Ficar
+                  </PressButton>
+                </div>
               </>
             )}
             {acting && (
@@ -133,13 +149,31 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
                   </PressButton>
                   <PressButton
                     className="btn"
+                    disabled={legal.supportTargets.length === 0}
+                    onClick={() => setSupportOpen(true)}
+                  >
+                    Apoiar
+                  </PressButton>
+                  <PressButton
+                    className="btn"
                     disabled={!legal.canRest}
                     onClick={() => send({ type: 'REST' })}
                   >
                     Descansar
                   </PressButton>
+                  {legal.canDebug && (
+                    <PressButton className="btn" onClick={() => setDebugOpen(true)}>
+                      Debug do Algoritmo
+                    </PressButton>
+                  )}
                 </div>
               </>
+            )}
+            {game.phase === 'algorithm' && (
+              <AlgorithmPanel
+                step={game.algoStep ?? 'event'}
+                onNext={() => send({ type: 'ALGORITHM_NEXT' })}
+              />
             )}
             {game.phase === 'ended' && (
               <PressButton className="btn btn-primary" onClick={onExit}>
@@ -148,17 +182,19 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             )}
           </div>
 
-          <Hand
-            player={active}
-            config={game.config}
-            selected={validSelected}
-            onToggle={toggleCard}
-          />
+          {inTurn && (
+            <Hand
+              player={active}
+              config={game.config}
+              selected={validSelected}
+              onToggle={toggleCard}
+            />
+          )}
         </section>
 
         <aside className="order-3 flex flex-col gap-3">
           <ThreatInspector game={game} threatId={inspectId} onClose={() => setInspectId(null)} />
-          <section className="panel text-sm">O registro de eventos entra no próximo bloco.</section>
+          <EventLog game={game} />
         </aside>
       </div>
 
@@ -172,6 +208,30 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
             send({ type: 'CONFRONT', threatId, cardIds });
             setConfrontOpen(false);
             setSelected([]);
+          }}
+        />
+      )}
+
+      {supportOpen && acting && (
+        <SupportModal
+          game={game}
+          targets={legal.supportTargets}
+          onClose={() => setSupportOpen(false)}
+          onConfirm={(toPlayerId, cardIds) => {
+            send({ type: 'SUPPORT', toPlayerId, cardIds });
+            setSupportOpen(false);
+            setSelected([]);
+          }}
+        />
+      )}
+
+      {debugOpen && legal.canDebug && (
+        <DebugModal
+          game={game}
+          onClose={() => setDebugOpen(false)}
+          onChoose={(swap) => {
+            send({ type: 'DEBUG_REORDER', swap });
+            setDebugOpen(false);
           }}
         />
       )}

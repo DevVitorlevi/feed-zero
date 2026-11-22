@@ -1,3 +1,4 @@
+import { viewPlayer } from '../activePlayer';
 import { motion } from 'framer-motion';
 import { ZONES } from '../../content/zones';
 import { threatStrength } from '../../engine/selectors';
@@ -28,7 +29,7 @@ interface Props {
 }
 
 export function Board({ game, reachable, onMove, inspectId, onInspect }: Props) {
-  const active = game.players[game.activeIdx];
+  const active = viewPlayer(game);
 
   return (
     <div className="relative mx-auto aspect-square w-full max-w-[720px] rounded-[20px] border-[3px] border-ink bg-white">
