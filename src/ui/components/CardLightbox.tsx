@@ -33,6 +33,11 @@ export function CardLightbox({ items, index, onIndex, onClose, action }: Props) 
   const open = item !== undefined;
   const count = items.length;
 
+  const latest = useRef({ index, count, onIndex, onClose });
+  useEffect(() => {
+    latest.current = { index, count, onIndex, onClose };
+  });
+
   useEffect(() => {
     if (index !== null && !items[index]) onClose();
   }, [index, items, onClose]);
@@ -43,13 +48,14 @@ export function CardLightbox({ items, index, onIndex, onClose, action }: Props) 
     dialogRef.current?.querySelector<HTMLElement>('[data-close]')?.focus();
 
     function onKey(e: KeyboardEvent) {
+      const { index: i, count: n, onIndex: setIndex, onClose: close } = latest.current;
       if (e.key === 'Escape') {
         e.preventDefault();
-        onClose();
-      } else if (e.key === 'ArrowLeft' && count > 1 && index !== null) {
-        onIndex((index - 1 + count) % count);
-      } else if (e.key === 'ArrowRight' && count > 1 && index !== null) {
-        onIndex((index + 1) % count);
+        close();
+      } else if (e.key === 'ArrowLeft' && n > 1 && i !== null) {
+        setIndex((i - 1 + n) % n);
+      } else if (e.key === 'ArrowRight' && n > 1 && i !== null) {
+        setIndex((i + 1) % n);
       } else if (e.key === 'Tab') {
         const nodes = dialogRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE);
         if (!nodes || nodes.length === 0) return;
