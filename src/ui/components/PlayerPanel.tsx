@@ -7,13 +7,15 @@ import { ZONE_SHORT, charDef } from '../labels';
 
 function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: string | number }) {
   return (
-    <div className="flex items-center gap-1 rounded-[10px] border-2 border-ink bg-paper px-2 py-1">
-      {icon}
-      <span className="text-sm font-bold">{label}</span>
+    <div className="flex min-w-0 items-center justify-between gap-2 rounded-[10px] border-2 border-ink bg-paper px-2 py-1">
+      <span className="flex shrink-0 items-center gap-1 text-sm font-bold">
+        {icon}
+        {label}
+      </span>
       <motion.span
         key={String(value)}
-        className="inline-block text-base font-extrabold"
-        initial={{ scale: 1.5 }}
+        className="min-w-0 truncate text-base font-extrabold"
+        initial={{ scale: 1.3 }}
         animate={{ scale: 1 }}
         transition={{ type: 'spring', stiffness: 400, damping: 20 }}
       >
@@ -37,9 +39,9 @@ export function PlayerPanel({ game }: { game: GameState }) {
             style={{ borderColor: isActive ? '#7B4FD6' : '#2B2B33', borderLeftWidth: 10 }}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="truncate font-extrabold">{p.name}</span>
+              <span className="min-w-0 truncate font-extrabold">{p.name}</span>
               <span
-                className="rounded-full border-2 border-ink px-2 text-sm font-bold"
+                className="shrink-0 rounded-full border-2 border-ink px-2 text-sm font-bold"
                 style={{
                   background: def.color,
                   color: def.id === 'caio' || def.id === 'helena' ? '#fff' : '#2B2B33',
@@ -49,7 +51,7 @@ export function PlayerPanel({ game }: { game: GameState }) {
               </span>
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-1">
+            <div className="mt-2 flex flex-col gap-1">
               <Stat
                 icon={<Heart size={16} aria-hidden="true" />}
                 label="Integridade"
@@ -73,7 +75,7 @@ export function PlayerPanel({ game }: { game: GameState }) {
             </div>
 
             {(isActive || p.suspended) && (
-              <div className="mt-2 flex gap-1 text-sm font-bold">
+              <div className="mt-2 flex flex-wrap gap-1 text-sm font-bold">
                 {isActive && (
                   <span className="rounded-full bg-violet px-2 text-white">Jogando agora</span>
                 )}

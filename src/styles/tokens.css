@@ -39,7 +39,7 @@ body {
     'Segoe UI',
     Roboto,
     sans-serif;
-  font-size: 16px;
+  font-size: 1rem;
   overflow-x: hidden;
 }
 
@@ -100,7 +100,7 @@ body {
     border: var(--outline) solid var(--ink);
     border-radius: var(--radius-sm);
     background: #fff;
-    font-size: 16px;
+    font-size: 1rem;
     transition: border-color 160ms ease;
   }
   .input:focus {
