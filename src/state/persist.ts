@@ -1,27 +1,67 @@
 import type { GameState } from '../engine/types';
 
 const KEY = 'feed-zero:save';
-const VERSION = 1;
+const VERSION = 2;
 
 interface Save {
   version: number;
   state: GameState;
 }
 
+type Rec = Record<string, unknown>;
+
+function isRec(value: unknown): value is Rec {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function isNum(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function validPlayer(value: unknown): boolean {
+  if (!isRec(value)) return false;
+  return (
+    typeof value.id === 'string' &&
+    typeof value.name === 'string' &&
+    typeof value.character === 'string' &&
+    typeof value.zone === 'string' &&
+    isNum(value.integrity) &&
+    isNum(value.reputation) &&
+    Array.isArray(value.hand)
+  );
+}
+
+function validThreat(value: unknown): boolean {
+  if (!isRec(value)) return false;
+  return typeof value.zone === 'string' && isRec(value.card) && typeof value.card.id === 'string';
+}
+
+function validConfig(value: unknown): boolean {
+  if (!isRec(value)) return false;
+  return isRec(value.limits) && isRec(value.confront);
+}
+
 function looksValid(value: unknown): value is Save {
-  if (typeof value !== 'object' || value === null) return false;
-  const v = value as Partial<Save>;
-  if (v.version !== VERSION || typeof v.state !== 'object' || v.state === null) return false;
-  const s = v.state as Partial<GameState>;
+  if (!isRec(value) || value.version !== VERSION || !isRec(value.state)) return false;
+  const s = value.state;
   return (
     s.version === 1 &&
     typeof s.seed === 'string' &&
-    Array.isArray(s.players) &&
-    s.players.length >= 2 &&
-    Array.isArray(s.threats) &&
     typeof s.phase === 'string' &&
     s.phase !== 'ended' &&
-    typeof s.config === 'object'
+    isNum(s.hate) &&
+    isNum(s.round) &&
+    isNum(s.eliminated) &&
+    isNum(s.goal) &&
+    Array.isArray(s.players) &&
+    s.players.length >= 2 &&
+    s.players.every(validPlayer) &&
+    isNum(s.activeIdx) &&
+    s.activeIdx >= 0 &&
+    s.activeIdx <= s.players.length &&
+    Array.isArray(s.threats) &&
+    s.threats.every(validThreat) &&
+    validConfig(s.config)
   );
 }
 
