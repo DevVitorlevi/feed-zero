@@ -25,11 +25,19 @@ const fade = {
   transition: { duration: 0.18 },
 };
 
+function seedFromUrl(): string {
+  try {
+    return new URLSearchParams(window.location.search).get('seed') ?? '';
+  } catch {
+    return '';
+  }
+}
+
 export function SetupScreen({ onBack, onStarted }: Props) {
   const { message } = useApp();
   const send = useSend();
   const [count, setCount] = useState(2);
-  const [seed, setSeed] = useState('');
+  const [seed, setSeed] = useState(seedFromUrl);
   const [slots, setSlots] = useState<Slot[]>(
     DEFAULT_CHARS.map((c, i) => ({ name: `Jogador ${i + 1}`, character: c })),
   );

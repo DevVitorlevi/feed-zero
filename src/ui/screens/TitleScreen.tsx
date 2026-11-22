@@ -8,6 +8,7 @@ import { PressButton } from '../components/PressButton';
 interface Props {
   onNewGame: () => void;
   onResume: () => void;
+  onAbout: () => void;
 }
 
 const CHIP_COLORS = [
@@ -76,7 +77,7 @@ function CardFan() {
   );
 }
 
-export function TitleScreen({ onNewGame, onResume }: Props) {
+export function TitleScreen({ onNewGame, onResume, onAbout }: Props) {
   const { game } = useApp();
   const [showRules, setShowRules] = useState(false);
 
@@ -161,6 +162,11 @@ export function TitleScreen({ onNewGame, onResume }: Props) {
                 onClick={() => setShowRules((v) => !v)}
               >
                 {showRules ? 'Fechar regras' : 'Como jogar'}
+              </PressButton>
+            </motion.div>
+            <motion.div variants={item}>
+              <PressButton className="btn w-full" onClick={onAbout}>
+                Sobre o jogo
               </PressButton>
             </motion.div>
           </motion.div>

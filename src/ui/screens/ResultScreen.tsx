@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { RotateCcw, Repeat, Home } from 'lucide-react';
+import { Home, Link2, Repeat, RotateCcw } from 'lucide-react';
+import { useState } from 'react';
 import type { GameResult } from '../../engine/types';
 import { useApp, useSend } from '../../state/GameContext';
 import { EventLog } from '../components/EventLog';
@@ -33,11 +34,24 @@ const OUTCOME: Record<
 export function ResultScreen({ onHome }: { onHome: () => void }) {
   const { game } = useApp();
   const send = useSend();
+  const [copied, setCopied] = useState(false);
   if (!game || !game.result) return null;
 
   const { outcome, ranking } = game.result;
   const o = OUTCOME[outcome];
   const won = outcome === 'victory';
+
+  async function copyLink() {
+    if (!game) return;
+    try {
+      const url = new URL(window.location.href);
+      url.search = `?seed=${encodeURIComponent(game.seed)}`;
+      await navigator.clipboard.writeText(url.toString());
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 p-4">
@@ -113,6 +127,10 @@ export function ResultScreen({ onHome }: { onHome: () => void }) {
         <PressButton className="btn flex items-center gap-1" onClick={onHome}>
           <Home size={18} aria-hidden="true" />
           Início
+        </PressButton>
+        <PressButton className="btn flex items-center gap-1" onClick={copyLink}>
+          <Link2 size={18} aria-hidden="true" />
+          {copied ? 'Link copiado' : 'Copiar link da seed'}
         </PressButton>
       </div>
 

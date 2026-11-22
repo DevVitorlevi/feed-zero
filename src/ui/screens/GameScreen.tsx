@@ -1,4 +1,4 @@
-import { Undo2 } from 'lucide-react';
+import { BookOpen, Undo2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { CONFIG } from '../../content/config';
 import { getLegalActions } from '../../engine/selectors';
@@ -16,6 +16,7 @@ import { HateMeter } from '../components/HateMeter';
 import { PhaseBanner } from '../components/PhaseBanner';
 import { PlayerPanel } from '../components/PlayerPanel';
 import { PressButton } from '../components/PressButton';
+import { RulesModal } from '../components/RulesModal';
 import { SupportModal } from '../components/SupportModal';
 import { ThreatInspector } from '../components/ThreatInspector';
 
@@ -29,6 +30,7 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
   const [confrontOpen, setConfrontOpen] = useState(false);
   const [supportOpen, setSupportOpen] = useState(false);
   const [debugOpen, setDebugOpen] = useState(false);
+  const [rulesOpen, setRulesOpen] = useState(false);
 
   const legal = useMemo(() => (game ? getLegalActions(game) : null), [game]);
 
@@ -62,6 +64,10 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
+          <PressButton className="btn" onClick={() => setRulesOpen(true)}>
+            <BookOpen size={18} className="mr-1 inline" aria-hidden="true" />
+            Regras
+          </PressButton>
           <PressButton
             className="btn"
             disabled={!legal.canUndo}
@@ -243,6 +249,8 @@ export function GameScreen({ onExit }: { onExit: () => void }) {
           onChoose={(option) => send({ type: 'CHOOSE_DILEMMA', option })}
         />
       )}
+
+      {rulesOpen && <RulesModal onClose={() => setRulesOpen(false)} />}
     </div>
   );
 }
