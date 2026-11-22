@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { Flame } from 'lucide-react';
+import { useApp } from '../../state/GameContext';
+import { FlashValue } from './FlashValue';
 
 interface Props {
   value: number;
@@ -13,17 +15,22 @@ function cellColor(index: number): string {
 }
 
 export function HateMeter({ value, max }: Props) {
+  const { events, tick } = useApp();
   const danger = value >= 9;
+  const delta = events.reduce((sum, e) => (e.kind === 'hate_changed' ? sum + e.delta : sum), 0);
+
   return (
     <section className="panel">
       <div className="flex items-center justify-between font-bold">
         <span className="flex items-center gap-1">
           <Flame size={18} aria-hidden="true" /> Ódio Viral
         </span>
-        <span>
-          {value}/{max}
-          {danger && ' · Perigo!'}
-        </span>
+        <FlashValue delta={delta} tick={tick} goodWhenUp={false}>
+          <span>
+            {value}/{max}
+            {danger && ' · Perigo!'}
+          </span>
+        </FlashValue>
       </div>
       <div
         role="meter"

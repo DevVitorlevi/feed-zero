@@ -1,31 +1,53 @@
-import { motion } from 'framer-motion';
 import { Heart, Layers, MapPin, Star } from 'lucide-react';
 import type { ReactNode } from 'react';
-import type { GameState } from '../../engine/types';
+import type { GameEvent, GameState } from '../../engine/types';
+import { useApp } from '../../state/GameContext';
 import { turnPlayer } from '../activePlayer';
 import { ZONE_SHORT, charDef } from '../labels';
+import { FlashValue } from './FlashValue';
 
-function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: string | number }) {
+interface StatProps {
+  icon: ReactNode;
+  label: string;
+  value: string | number;
+  delta?: number;
+  tick: number;
+  goodWhenUp?: boolean;
+}
+
+function Stat({ icon, label, value, delta = 0, tick, goodWhenUp = true }: StatProps) {
   return (
     <div className="flex min-w-0 items-center justify-between gap-2 rounded-[10px] border-2 border-ink bg-paper px-2 py-1">
       <span className="flex shrink-0 items-center gap-1 text-sm font-bold">
         {icon}
         {label}
       </span>
-      <motion.span
-        key={String(value)}
+      <FlashValue
+        delta={delta}
+        tick={tick}
+        goodWhenUp={goodWhenUp}
         className="min-w-0 truncate text-base font-extrabold"
-        initial={{ scale: 1.3 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 20 }}
       >
         {value}
-      </motion.span>
+      </FlashValue>
     </div>
   );
 }
 
+function statDelta(
+  events: GameEvent[],
+  playerId: string,
+  stat: 'integrity' | 'reputation',
+): number {
+  return events.reduce(
+    (sum, e) =>
+      e.kind === 'stat_changed' && e.playerId === playerId && e.stat === stat ? sum + e.delta : sum,
+    0,
+  );
+}
+
 export function PlayerPanel({ game }: { game: GameState }) {
+  const { events, tick } = useApp();
   const active = turnPlayer(game);
   return (
     <ul className="flex flex-col gap-2" aria-label="Jogadores">
@@ -56,21 +78,27 @@ export function PlayerPanel({ game }: { game: GameState }) {
                 icon={<Heart size={16} aria-hidden="true" />}
                 label="Integridade"
                 value={`${p.integrity}/${game.config.limits.integrityMax}`}
+                delta={statDelta(events, p.id, 'integrity')}
+                tick={tick}
               />
               <Stat
                 icon={<Star size={16} aria-hidden="true" />}
                 label="Reputação"
                 value={p.reputation}
+                delta={statDelta(events, p.id, 'reputation')}
+                tick={tick}
               />
               <Stat
                 icon={<Layers size={16} aria-hidden="true" />}
                 label="Mão"
                 value={`${p.hand.length}/${game.config.limits.handMax}`}
+                tick={tick}
               />
               <Stat
                 icon={<MapPin size={16} aria-hidden="true" />}
                 label="Zona"
                 value={ZONE_SHORT[p.zone]}
+                tick={tick}
               />
             </div>
 
