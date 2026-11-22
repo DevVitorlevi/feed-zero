@@ -3,6 +3,7 @@ import { Home, Link2, Repeat, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import type { GameResult } from '../../engine/types';
 import { useApp, useSend } from '../../state/GameContext';
+import { Confetti } from '../components/Confetti';
 import { EventLog } from '../components/EventLog';
 import { PressButton } from '../components/PressButton';
 import { charDef } from '../labels';
@@ -40,6 +41,7 @@ export function ResultScreen({ onHome }: { onHome: () => void }) {
   const { outcome, ranking } = game.result;
   const o = OUTCOME[outcome];
   const won = outcome === 'victory';
+  const lost = outcome === 'feed_tomado';
 
   async function copyLink() {
     if (!game) return;
@@ -55,6 +57,7 @@ export function ResultScreen({ onHome }: { onHome: () => void }) {
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 p-4">
+      {won && <Confetti />}
       <motion.section
         role="status"
         aria-live="polite"
@@ -64,7 +67,9 @@ export function ResultScreen({ onHome }: { onHome: () => void }) {
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 260, damping: 20 }}
       >
-        <h1 className="text-3xl font-extrabold sm:text-5xl">{o.title}</h1>
+        <h1 className={`text-3xl font-extrabold sm:text-5xl${lost ? ' glitch-title' : ''}`}>
+          {o.title}
+        </h1>
         <p className="mt-2 text-base font-bold sm:text-lg">{o.text}</p>
         <p className="mt-2 text-sm font-bold">
           Eliminadas {game.eliminated}/{game.goal} · Ódio Viral {game.hate}/
