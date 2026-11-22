@@ -1,8 +1,8 @@
 import { AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { useApp } from '../state/GameContext';
-import { PressButton } from './components/PressButton';
 import { ScreenTransition } from './components/ScreenTransition';
+import { GameScreen } from './screens/GameScreen';
 import { SetupScreen } from './screens/SetupScreen';
 import { TitleScreen } from './screens/TitleScreen';
 
@@ -20,15 +20,9 @@ export function App() {
           <SetupScreen onBack={() => setScreen('title')} onStarted={() => setScreen('game')} />
         </ScreenTransition>
       )}
-      {current === 'game' && game && (
+      {current === 'game' && (
         <ScreenTransition key="game">
-          {/* Tela de jogo entra no Bloco 4. */}
-          <main className="p-6">
-            <p>Partida em andamento: {game.players.map((p) => p.name).join(', ')}</p>
-            <PressButton className="btn mt-4" onClick={() => setScreen('title')}>
-              Voltar ao título
-            </PressButton>
-          </main>
+          <GameScreen onExit={() => setScreen('title')} />
         </ScreenTransition>
       )}
       {current === 'title' && (
