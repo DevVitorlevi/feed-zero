@@ -76,7 +76,7 @@ describe('2. Preparação', () => {
   it('Com 4 jogadores as 9 Respostas do MVP acabam nas mãos, sem exceção e sem perder cartas', () => {
     const s = newGame(['marina', 'caio', 'rafa', 'helena']);
     const inHands = s.players.reduce((n, p) => n + p.hand.length, 0);
-    expect(inHands + s.decks.responses.length).toBe(9);
+    expect(inHands + s.decks.responses.length).toBe(9 * s.config.responseCopies);
   });
 
   it('Recusa partida com número de jogadores, nomes ou personagens inválidos', () => {
